@@ -2,10 +2,23 @@ async function getTitle() {
     let tabs = await browser.tabs.query({ active: true, currentWindow: true });
     return tabs[0].url;
 }
-async function createFile()
-{
+function getCurrentTab() {
+    return browser.tabs.query({ active: true, currentWindow: true });
+}
+
+async function createFile() {
     let text = await getTitle();
-    text = text.split("/")[4];
+    text = text.split("/")[4].replaceAll("-", "_");
+    const tab = await getCurrentTab();
+    const tabId = tab[0].id;
+    browser.tabs.sendMessage(tabId, { command: "send_examples" })
+        .then((response) => {
+            if (response.type === "examples") {
+                console.log(response.data);
+            }
+        })
+        .catch((error) => { console.log(error) });
+
     const blob = new Blob([text], { type: 'text/plain' });
     const fileurl = URL.createObjectURL(blob);
     const filename = `${text}.cpp`;
@@ -16,7 +29,7 @@ async function createFile()
         saveAs: true,
         conflictAction: "uniquify"
     };
-    
+
     return file;
 }
 async function downloadFile() {
@@ -24,9 +37,11 @@ async function downloadFile() {
     const downloading = browser.downloads.download(file);
     downloading.then((id) => { console.log(id) }, (error) => { console.log(error) });
 }
-browser.runtime.onMessage.addListener((message) => {
-    if (message.command === "generate") {
-        downloadFile();
+browser.runtime.onMessage.addListener(
+    (message) => {
+        if (message.command === "generate") {
+            downloadFile();
+        }
     }
-})
+)
 
