@@ -28,7 +28,7 @@
       "matches": [
         "*://leetcode.com/problems/*"
       ],
-      "js": ["content_script.js"]
+      "js": ["./content/content_script.js"]
     }
   ]
 }
