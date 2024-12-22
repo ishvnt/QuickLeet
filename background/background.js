@@ -9,19 +9,18 @@ function getCurrentTab() {
 async function createFile() {
     let text = await getTitle();
     text = text.split("/")[4].replaceAll("-", "_");
+    const title = text;
     const tab = await getCurrentTab();
     const tabId = tab[0].id;
-    browser.tabs.sendMessage(tabId, { command: "send_examples" })
-        .then((response) => {
-            if (response.type === "examples") {
-                console.log(response.data);
-            }
-        })
-        .catch((error) => { console.log(error) });
 
+    const response = await browser.tabs.sendMessage(tabId, { command: "send_examples" });
+    if (response.type === "examples") {
+        text += "\n" + response.data;
+        console.log(response.data);
+    }
     const blob = new Blob([text], { type: 'text/plain' });
     const fileurl = URL.createObjectURL(blob);
-    const filename = `${text}.cpp`;
+    const filename = `${title}.cpp`;
 
     const file = {
         url: fileurl,
@@ -35,7 +34,7 @@ async function createFile() {
 async function downloadFile() {
     const file = await createFile();
     const downloading = browser.downloads.download(file);
-    downloading.then((id) => { console.log(id) }, (error) => { console.log(error) });
+    downloading.then((id) => { console.log(id); }, (error) => { console.log(error); });
 }
 browser.runtime.onMessage.addListener(
     (message) => {
