@@ -10,18 +10,22 @@ function getCurrentTab() {
 function generateCppFile(data) {
     const description = data.description;
     const functionPrototype = data.function;
+    const functionName = functionPrototype.match(/(?<=\s)([^(\s]+)(?=\()/)[0];
+    console.log(functionName);
+    console.log(functionPrototype);
     let text = `#include <bits/stdc++.h>\nusing namespace std;\n`;
     text += "\n" + "/*" + description + "*/\n";
     text += "\n" + functionPrototype + "\n";
-    text += "\nint main() {\n"
+    text += "\nint main() {\n\tSolution sol;\n"
     let j = 1;
     data.examples.forEach((example) => {
         for (let i = 0; i < example.input.length; i++) {
             const key = Object.keys(example.input[i]).toString();
-            text += `\t${key}${j} = ${example.input[i][key].replaceAll("[", "{").replaceAll("]", "}")};\n`;
+            const inputType = data.types["input"][key];
+            text += `\t${inputType} ${key}${j} = ${example.input[i][key].replaceAll("[", "{").replaceAll("]", "}")};\n`;
         }
-        console.log(example.output);
-        text += `\toutput${j} = ${example.output["Output"].replaceAll("[", "{").replaceAll("]", "}")};\n\n`;
+        const outputType = data.types["output"];
+        text += `\t${outputType} output${j} = ${example.output["Output"].replaceAll("[", "{").replaceAll("]", "}")};\n\n`;
         j++;
     })
     text += "\treturn 0;\n}";

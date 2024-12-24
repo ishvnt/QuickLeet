@@ -55,15 +55,40 @@ function extractFunctionPrototype() {
     return editor.innerText.replaceAll(" ", " ");
 }
 
+function extractTypes(functionPrototype) {
+    const startOfSolution = functionPrototype.indexOf("class Solution");
+    functionPrototype = functionPrototype.slice(startOfSolution);
+
+    const [start, end] = [functionPrototype.indexOf(":\n")+1,functionPrototype.indexOf(") ")+1];
+    
+    functionPrototype = functionPrototype.slice(start, end).trim();
+
+    const types = {};
+    const ouputRegex = /^[^\s]+/;
+    const outputType = functionPrototype.match(ouputRegex).toString();
+    
+    types["output"] = outputType;
+    types["input"] = {};
+    const args = functionPrototype.slice(functionPrototype.indexOf("(")+1, functionPrototype.indexOf(")")).split(",");
+    args.forEach((arg)=>{
+        const [val, key] = arg.trim().split(" ");
+        types["input"][key] = val.replace("&","");
+    })
+    return types;
+}
+
 function sendData(request, sender, sendResponse) {
     console.log("sending data....")
     const examples = extractExamples();
     const description = extractDescription();
     const functionPrototype = extractFunctionPrototype();
+    const types = extractTypes(functionPrototype);
     const data = {};
     data["description"] = description;
     data["examples"] = examples;
     data["function"] = functionPrototype;
+    data["types"] = types;
+    console.log(data);
     sendResponse({
         type: "data",
         data: data
