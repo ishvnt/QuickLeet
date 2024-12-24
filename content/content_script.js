@@ -1,16 +1,16 @@
-function getDescription() {
-    const descriptionClassName = "elfjS";
-    const description = document.body.querySelector(`div.${descriptionClassName}`)
-    return description.textContent;
+function getContent() {
+    const contentClassName = "elfjS";
+    const content = document.body.querySelector(`div.${contentClassName}`);
+    return content.textContent;
 }
 
 function extractExamples() {
-    const description = getDescription();
-    const [start, end] = [description.indexOf(" "), description.lastIndexOf(" ")];
-    const examplesString = description.slice(start, end).trim();
+    const content = getContent();
+    const [start, end] = [content.indexOf(" "), content.lastIndexOf(" ")];
+    const examplesString = content.slice(start, end).trim();
     let examples = examplesString.split("Example ");
     let examplesArray = []
-    
+
     for (let i = 1; i < examples.length; i++) {
         const inputRegex = / .*/
         const outputRegex = /Output: .*/
@@ -33,26 +33,39 @@ function extractExamples() {
             inputObject[elements[0]] = elements[1];
             inputs.push(inputObject);
         })
-        
+
         const example = {};
         example[`input`] = inputs;
         example[`output`] = outputObject;
         examplesArray.push(example);
     }
-    console.log(examplesArray);
     return examplesArray;
 }
 
-function sendExamples(request, sender, sendResponse) {
-    console.log("sending examples....");
-    const examples = extractExamples();
-    sendResponse({
-        type: "examples",
-        data: examples
-    })
+function extractDescription() {
+    const content = getContent();
+    const descriptionEndIndex = content.indexOf("Example");
+    const description = content.slice(0,descriptionEndIndex).trim().replaceAll("\n\n", "\n");
+    return description;
 }
+
+function sendData(request, sender, sendResponse) {
+    console.log("sending data....")
+    const examples = extractExamples();
+    const description = extractDescription();
+    const data = {};
+    data["description"] = description;
+    data["examples"] = examples;
+    console.log(data);
+    sendResponse({
+        type: "data",
+        data: data
+    })
+    
+}
+
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.command === "send_examples") {
-        sendExamples(message, sender, sendResponse);
+    if (message.command === "send_data") {
+        sendData(message, sender, sendResponse);
     }
 })

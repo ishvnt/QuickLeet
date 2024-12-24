@@ -7,16 +7,30 @@ function getCurrentTab() {
 }
 
 async function createFile() {
-    let text = await getTitle();
-    text = text.split("/")[4].replaceAll("-", "_");
-    const title = text;
+    let title = await getTitle();
+    title = title.split("/")[4].replaceAll("-", "_");
     const tab = await getCurrentTab();
     const tabId = tab[0].id;
 
-    const response = await browser.tabs.sendMessage(tabId, { command: "send_examples" });
-    if (response.type === "examples") {
-        text += "\n" + response.data;
-        console.log(response.data);
+    let text = `#include <bits/stdc++.h>\nusing namespace std;\n`;
+
+    const response = await browser.tabs.sendMessage(tabId, { command: "send_data" });
+    if (response.type === "data") {
+        const description = response.data.description;
+        text += "\n" + "/*" + description + "*/";
+        text += "\nint main() {\n"
+        let j = 1;
+        response.data.examples.forEach((example)=>{
+            for(let i=0;i<example.input.length;i++) {
+                // console.log(example.input[i]);
+                const key = Object.keys(example.input[i]).toString();
+                text += "\t" + key + j + " = " + example.input[i][key].replaceAll("[", "{").replaceAll("]", "}") + ";\n";
+            }
+            console.log(example.output);
+            text += `\toutput${j} = ${example.output["Output"].replaceAll("[", "{").replaceAll("]", "}")};\n\n`
+            j++;
+        })
+        text += "\treturn 0;\n}";
     }
     const blob = new Blob([text], { type: 'text/plain' });
     const fileurl = URL.createObjectURL(blob);
