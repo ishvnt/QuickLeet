@@ -6,31 +6,36 @@ function getCurrentTab() {
     return browser.tabs.query({ active: true, currentWindow: true });
 }
 
+function generateCppFile(data) {
+    const description = data.description;
+    const functionPrototype = data.function;
+    let text = `#include <bits/stdc++.h>\nusing namespace std;\n`;
+    text += "\n" + "/*" + description + "*/\n";
+    text += "\n" + functionPrototype + "\n";
+    text += "\nint main() {\n"
+    let j = 1;
+    data.examples.forEach((example) => {
+        for (let i = 0; i < example.input.length; i++) {
+            const key = Object.keys(example.input[i]).toString();
+            text += "\t" + key + j + " = " + example.input[i][key].replaceAll("[", "{").replaceAll("]", "}") + ";\n";
+        }
+        console.log(example.output);
+        text += `\toutput${j} = ${example.output["Output"].replaceAll("[", "{").replaceAll("]", "}")};\n\n`
+        j++;
+    })
+    text += "\treturn 0;\n}";
+    return text;
+}
+
 async function createFile() {
     let title = await getTitle();
     title = title.split("/")[4].replaceAll("-", "_");
     const tab = await getCurrentTab();
     const tabId = tab[0].id;
-
-    let text = `#include <bits/stdc++.h>\nusing namespace std;\n`;
-
+    let text = "";
     const response = await browser.tabs.sendMessage(tabId, { command: "send_data" });
     if (response.type === "data") {
-        const description = response.data.description;
-        text += "\n" + "/*" + description + "*/";
-        text += "\nint main() {\n"
-        let j = 1;
-        response.data.examples.forEach((example)=>{
-            for(let i=0;i<example.input.length;i++) {
-                // console.log(example.input[i]);
-                const key = Object.keys(example.input[i]).toString();
-                text += "\t" + key + j + " = " + example.input[i][key].replaceAll("[", "{").replaceAll("]", "}") + ";\n";
-            }
-            console.log(example.output);
-            text += `\toutput${j} = ${example.output["Output"].replaceAll("[", "{").replaceAll("]", "}")};\n\n`
-            j++;
-        })
-        text += "\treturn 0;\n}";
+        text = generateCppFile(response.data);
     }
     const blob = new Blob([text], { type: 'text/plain' });
     const fileurl = URL.createObjectURL(blob);

@@ -49,19 +49,26 @@ function extractDescription() {
     return description;
 }
 
+function extractFunctionPrototype() {
+    const editorClassName = "view-lines";
+    const editor = document.querySelector(`div.${editorClassName}`);
+    return editor.innerText.replaceAll(" ", " ");
+}
+
 function sendData(request, sender, sendResponse) {
     console.log("sending data....")
     const examples = extractExamples();
     const description = extractDescription();
+    const functionPrototype = extractFunctionPrototype();
     const data = {};
     data["description"] = description;
     data["examples"] = examples;
+    data["function"] = functionPrototype;
     console.log(data);
     sendResponse({
         type: "data",
         data: data
     })
-    
 }
 
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
