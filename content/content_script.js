@@ -64,7 +64,6 @@ function sendData(request, sender, sendResponse) {
     data["description"] = description;
     data["examples"] = examples;
     data["function"] = functionPrototype;
-    console.log(data);
     sendResponse({
         type: "data",
         data: data

@@ -2,6 +2,7 @@ async function getTitle() {
     let tabs = await browser.tabs.query({ active: true, currentWindow: true });
     return tabs[0].url;
 }
+
 function getCurrentTab() {
     return browser.tabs.query({ active: true, currentWindow: true });
 }
@@ -17,10 +18,10 @@ function generateCppFile(data) {
     data.examples.forEach((example) => {
         for (let i = 0; i < example.input.length; i++) {
             const key = Object.keys(example.input[i]).toString();
-            text += "\t" + key + j + " = " + example.input[i][key].replaceAll("[", "{").replaceAll("]", "}") + ";\n";
+            text += `\t${key}${j} = ${example.input[i][key].replaceAll("[", "{").replaceAll("]", "}")};\n`;
         }
         console.log(example.output);
-        text += `\toutput${j} = ${example.output["Output"].replaceAll("[", "{").replaceAll("]", "}")};\n\n`
+        text += `\toutput${j} = ${example.output["Output"].replaceAll("[", "{").replaceAll("]", "}")};\n\n`;
         j++;
     })
     text += "\treturn 0;\n}";
@@ -47,14 +48,15 @@ async function createFile() {
         saveAs: true,
         conflictAction: "uniquify"
     };
-
     return file;
 }
+
 async function downloadFile() {
     const file = await createFile();
     const downloading = browser.downloads.download(file);
     downloading.then((id) => { console.log(id); }, (error) => { console.log(error); });
 }
+
 browser.runtime.onMessage.addListener(
     (message) => {
         if (message.command === "generate") {
