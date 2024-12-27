@@ -4,7 +4,8 @@
   "version": "0.1",
   "description": "Generates Boilerplate Code for LeetCode Problems",
   "icons": {
-    "48": "icons/border-48.png"
+    "48": "icons/icon-48.png",
+    "96" : "icons/icon-96.png"
   },
   "permissions": [
     "activeTab",
@@ -17,7 +18,7 @@
   },
   
   "browser_action": {
-    "default_icon": "icons/border-48.png",
+    "default_icon": "icons/icon-48.png",
     "default_title": "LeetCode Boilerplate Generator",
     "default_popup": "popup/index.html"
   },
@@ -25,6 +26,11 @@
     {
       "matches": ["*://leetcode.com/problems/*"],
       "js": ["./content/content_script.js"]
+    },
+    {
+      "matches": ["*://leetcode.com/problems/*"],
+      "js": ["./content/main_world.js"],
+      "world": "MAIN"
     }
   ]
 }

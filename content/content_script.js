@@ -45,43 +45,96 @@ function extractExamples() {
 function extractDescription() {
     const content = getContent();
     const descriptionEndIndex = content.indexOf("Example");
-    const description = content.slice(0,descriptionEndIndex).trim().replaceAll("\n\n", "\n");
+    const description = content.slice(0, descriptionEndIndex).trim().replaceAll("\n\n", "\n");
     return description;
 }
+let editor = null;
+let contentPromiseResolver = null;
 
-function extractFunctionPrototype() {
-    const editorClassName = "view-lines";
-    const editor = document.querySelector(`div.${editorClassName}`);
-    return editor.innerText.replaceAll(" ", " ");
+const editorContentPromise = new Promise((resolve) => {
+    contentPromiseResolver = resolve;
+});
+
+let s = document.createElement('script');
+s.src = browser.runtime.getURL("./content/main_world.js");
+(document.head || document.documentElement).appendChild(s);
+s.onload = () => {
+    s.remove();
+};
+document.addEventListener('editor_content', (e) => {
+    editor = e.detail;
+    contentPromiseResolver();
+})
+function sendMessageToMainWorld() {
+    window.postMessage({ type: "request", message: "send_editor" }, "*");
+}
+
+async function extractFunctionPrototype() {
+    sendMessageToMainWorld();
+    await editorContentPromise;
+    const [start, end] = [editor.indexOf("class"), editor.lastIndexOf(";") + 1];
+    const functionPrototype = editor.slice(start, end);
+    return functionPrototype;
+    // window.postMessage({type: "hello", message: "sup"},"*");
+    // window.
+    // browser.runtime.onMessage.addListener((message)=>{
+    //     if(message.type === "editor_content") {
+    //         console.log(message.data);
+    //     }
+    // })
+    // let editor = "";
+    // let s = document.createElement('script');
+    // s.src = browser.runtime.getURL("script.js");
+    // (document.head || document.documentElement).appendChild(s);
+    // s.onload = ()=>{
+    //     s.remove();
+    // };
+    // function getEditorData(e) {
+    //     editor = e.detail;
+    //     console.log(e.detail);
+    // }
+    // document.addEventListener('editor_content', function(e) {
+    //     getEditorData(e);
+    // });
+    // setTimeout(() => {
+    //     console.log(editor);
+    // }, 2);
+    // console.log(editor);
+    // const editorClassName = "view-lines";
+    // const editor = document.querySelector(`div.${editorClassName}`).innerText;
+    // // console.log(editor);
+    // const [start, end] = [editor.indexOf("class"), editor.lastIndexOf(";") + 1];
+    // const functionPrototype = editor.slice(start, end).replaceAll(" ", " ");
+    // // console.log(functionPrototype);
+
 }
 
 function extractTypes(functionPrototype) {
     const startOfSolution = functionPrototype.indexOf("class Solution");
     functionPrototype = functionPrototype.slice(startOfSolution);
 
-    const [start, end] = [functionPrototype.indexOf(":\n")+1,functionPrototype.indexOf(") ")+1];
-    
+    const [start, end] = [functionPrototype.indexOf(":\n") + 1, functionPrototype.indexOf(") ") + 1];
+
     functionPrototype = functionPrototype.slice(start, end).trim();
 
     const types = {};
     const ouputRegex = /^[^\s]+/;
     const outputType = functionPrototype.match(ouputRegex).toString();
-    
+
     types["output"] = outputType;
     types["input"] = {};
-    const args = functionPrototype.slice(functionPrototype.indexOf("(")+1, functionPrototype.indexOf(")")).split(",");
-    args.forEach((arg)=>{
+    const args = functionPrototype.slice(functionPrototype.indexOf("(") + 1, functionPrototype.indexOf(")")).split(",");
+    args.forEach((arg) => {
         const [val, key] = arg.trim().split(" ");
-        types["input"][key] = val.replace("&","");
+        types["input"][key] = val.replace("&", "");
     })
     return types;
 }
 
-function sendData(request, sender, sendResponse) {
-    console.log("sending data....")
+async function generateData() {
     const examples = extractExamples();
     const description = extractDescription();
-    const functionPrototype = extractFunctionPrototype();
+    const functionPrototype = await extractFunctionPrototype();
     const types = extractTypes(functionPrototype);
     const data = {};
     data["description"] = description;
@@ -89,14 +142,11 @@ function sendData(request, sender, sendResponse) {
     data["function"] = functionPrototype;
     data["types"] = types;
     console.log(data);
-    sendResponse({
-        type: "data",
-        data: data
-    })
+    return {type: "data", data: data};
 }
 
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+browser.runtime.onMessage.addListener((message) => {
     if (message.command === "send_data") {
-        sendData(message, sender, sendResponse);
+        return generateData();
     }
 })
