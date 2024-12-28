@@ -75,38 +75,6 @@ async function extractFunctionPrototype() {
     const [start, end] = [editor.indexOf("class"), editor.lastIndexOf(";") + 1];
     const functionPrototype = editor.slice(start, end);
     return functionPrototype;
-    // window.postMessage({type: "hello", message: "sup"},"*");
-    // window.
-    // browser.runtime.onMessage.addListener((message)=>{
-    //     if(message.type === "editor_content") {
-    //         console.log(message.data);
-    //     }
-    // })
-    // let editor = "";
-    // let s = document.createElement('script');
-    // s.src = browser.runtime.getURL("script.js");
-    // (document.head || document.documentElement).appendChild(s);
-    // s.onload = ()=>{
-    //     s.remove();
-    // };
-    // function getEditorData(e) {
-    //     editor = e.detail;
-    //     console.log(e.detail);
-    // }
-    // document.addEventListener('editor_content', function(e) {
-    //     getEditorData(e);
-    // });
-    // setTimeout(() => {
-    //     console.log(editor);
-    // }, 2);
-    // console.log(editor);
-    // const editorClassName = "view-lines";
-    // const editor = document.querySelector(`div.${editorClassName}`).innerText;
-    // // console.log(editor);
-    // const [start, end] = [editor.indexOf("class"), editor.lastIndexOf(";") + 1];
-    // const functionPrototype = editor.slice(start, end).replaceAll(" ", " ");
-    // // console.log(functionPrototype);
-
 }
 
 function extractTypes(functionPrototype) {
