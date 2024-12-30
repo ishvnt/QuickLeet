@@ -20,8 +20,18 @@ export function handleLinkedList() {
     }
 
     return head;
+}`;
+    const printLL = `void printLinkedList(ListNode* head) {
+    while (head) {
+        cout<<head->val;
+        if (head->next) {
+            cout<<"->";
+        }
+        head = head->next;
+    }
+    cout<<"->null"<<"\\n";
 }`
-  return [classDefinition, arrayToListNode];
+  return [classDefinition, arrayToListNode, printLL];
 }
 
 export function handleTree() {
@@ -56,6 +66,29 @@ export function handleTree() {
         i++;
     }
     return root;
+}\n`;
+    const printTree = `void printTree(TreeNode* root) {
+    if (!root) {
+        cout<<"Tree is empty."<<endl;
+        return;
+    }
+
+    queue<TreeNode*> q;
+    q.push(root);
+    
+    while (!q.empty()) {
+        TreeNode* currentNode = q.front();
+        q.pop();
+        
+        if (currentNode) {
+            cout<<currentNode->val<<" ";
+            q.push(currentNode->left);
+            q.push(currentNode->right);
+        } else {
+            cout<<"null ";
+        }
+    }
+    cout<<"\\n";
 }\n`
-    return [classDefinition, arrayToTree];
+    return [classDefinition, arrayToTree, printTree];
 }
