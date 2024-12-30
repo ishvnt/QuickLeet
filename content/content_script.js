@@ -109,7 +109,6 @@ async function generateData() {
     data["examples"] = examples;
     data["function"] = functionPrototype;
     data["types"] = types;
-    console.log(data);
     return {type: "data", data: data};
 }
 

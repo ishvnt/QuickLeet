@@ -13,8 +13,6 @@ function generateCppFile(data) {
     const description = data.description;
     const functionPrototype = data.function;
     const functionName = functionPrototype.match(/(?<=\s)([^(\s]+)(?=\()/)[0];
-    console.log(functionName);
-    console.log(functionPrototype);
     let text = `#include <bits/stdc++.h>\nusing namespace std;\n`;
     text += "\n" + "/*" + description + "*/\n\n";
     const [LLClassDefinition, arrayToListNode, printLL] = handleLinkedList();
@@ -81,9 +79,7 @@ async function createFile() {
     const tabId = tab[0].id;
     let text = "int main(){}";
     const response = await browser.tabs.sendMessage(tabId, { command: "send_data" });
-    console.log(response);
     if (response && response.type === "data") {
-        console.log(response.data);
         text = generateCppFile(response.data);
     }
     const blob = new Blob([text], { type: 'text/plain' });
@@ -100,9 +96,7 @@ async function createFile() {
 }
 
 async function downloadFile() {
-    console.log("hellow");
     const file = await createFile();
-    console.log("done");
     const downloading = browser.downloads.download(file);
     downloading.then((id) => { console.log(id); }, (error) => { console.log(error); });
 }
