@@ -1,43 +1,51 @@
+/**
+ * gets the content of the problem (everything on the left side of the page, problem description, examples)
+ * @returns string
+ */
 function getContent() {
-    const contentClassName = "elfjS";
+    const contentClassName = "elfjS";                                       // can change anytime
     const content = document.body.querySelector(`div.${contentClassName}`);
     return content.textContent;
 }
-
+/**
+ * extracts examples from the main content
+ * @returns (Object[])
+ */
 function extractExamples() {
     const content = getContent();
-    const [start, end] = [content.indexOf(" "), content.lastIndexOf(" ")];
+    const [start, end] = [content.indexOf(" "), content.lastIndexOf(" ")];  // indices of start and end of example block
     const examplesString = content.slice(start, end).trim();
-    let examples = examplesString.split("Example ");
-    let examplesArray = []
+    let examples = examplesString.split("Example ").splice(1);              // split the example block into separate examples, remove 1st element since it's just empty string
+    let examplesArray = []                                                  // create empty exampleArray to store example objects
 
-    for (let i = 1; i < examples.length; i++) {
-        const inputRegex = / .*/
-        const outputRegex = /Output: .*/
-        const input = examples[i].match(inputRegex).toString().trim();
-        const output = examples[i].match(outputRegex).toString().trim();
+    for (const example of examples) {
+        console.log(example);                                               // Log the current example for debugging
+        const inputRegex = / .*/                                            // Regular expression for extracting input
+        const outputRegex = /Output: .*/                                    // Regular expression for extracting output
+        const input = example.match(inputRegex).toString().trim();          // Extract and clean input
+        const output = example.match(outputRegex).toString().trim();        // Extract and clean output
 
-        let inputString = input.split(", ");
-        let outputString = output.split(": ");
+        let inputString = input.split(", ");                                // Split input string by commas
+        let outputString = output.split(": ");                              // Split output string by commas
 
-        let inputs = [];
-        let outputs = [];
+        let inputs = [];                                                    // Array to store input objects
+        let outputs = [];                                                   // Array to store output objects
 
         const outputObject = {};
-        outputObject[outputString[0]] = outputString[1];
+        outputObject[outputString[0]] = outputString[1];                    // Add output type and name in the form of key value pair
         outputs.push(outputObject);
 
-        inputString.forEach((element) => {
+        inputString.forEach((element) => {                                  // Process inputs
             const elements = element.split(" = ");
             const inputObject = {};
             inputObject[elements[0]] = elements[1];
             inputs.push(inputObject);
         })
 
-        const example = {};
-        example[`input`] = inputs;
-        example[`output`] = outputObject;
-        examplesArray.push(example);
+        const currentExample = {};
+        currentExample[`input`] = inputs;
+        currentExample[`output`] = outputObject;
+        examplesArray.push(currentExample);
     }
     return examplesArray;
 }

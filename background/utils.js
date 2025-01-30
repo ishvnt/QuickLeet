@@ -21,7 +21,7 @@ export function handleLinkedList() {
 
     return head;
 }`;
-    const printLL = `void printLinkedList(ListNode* head) {
+    const printLinkedList = `void printLinkedList(ListNode* head) {
     while (head) {
         cout<<head->val;
         if (head->next) {
@@ -31,7 +31,7 @@ export function handleLinkedList() {
     }
     cout<<"->null"<<"\\n";
 }`
-  return [classDefinition, arrayToListNode, printLL];
+  return [classDefinition, arrayToListNode, printLinkedList];
 }
 
 export function handleTree() {
